@@ -1,0 +1,85 @@
+{%extends 'blog/base.html'%}
+{%load crispy_forms_tags%}
+     {% block content %}
+    <style>
+        .replied-comments{
+        margin-left:70px;
+        }
+    </style>
+
+
+
+            <article class="media content-section">
+              <div class="media-body">
+                <div class="article-metadata">
+                  <a class="mr-2" href="#">{{ posts.author|title }}</a>
+                  <small class="text-muted">{{ posts.date_posted|date:"F d, Y"}}</small>
+                </div>
+                <h2><a class="article-title" href="#">{{ posts.title|title }}</a></h2>
+                  <p class="article-content">{{ posts.content|title }}</p>
+                  {%if posts.image.url %}
+                       <div class="col-md-4">
+                         <img src="{{ posts.image.url }}" class="img-responsive"
+                              style="width: 250%; float: left; margin-right: 50px;" />
+                      </div>
+                  {%endif%}
+                       <br><br><br><br>
+                       <br><br><br><br>
+                       <br><br><br><br>
+                       <br><br>
+
+                       {{ total_likes }} Like{{total_likes|pluralize}}
+                      <form action="{% url 'like_post'%}" method="post">
+                          {% csrf_token %}
+                          {%if is_liked%}
+
+                              <button type="submit" name="post_id" value="{{posts.id}}"
+                                      class="btn btn-danger">DisLike
+                              </button>
+                          {%else%}
+                              <button type="submit" name="post_id" value="{{posts.id}}"
+                                      class="btn btn-success">Like
+                              </button>
+                          {%endif%}
+                      </form>
+                      <hr>
+                          <div class="main-comments-sections">
+                              <div class="container-fluid mt-2">
+                                  <div class="form-group row">
+                                       <form method="POST" enctype="multipart/form-data">
+                                          {%csrf_token%}
+                                          {{comment_form|crispy}}
+                                          <input type="submit" value="Submit" class="btn btn-outline-success" >
+                                       </form>
+                                  </div>
+                              </div>
+                              {{comments.count}}Comment{{comments|pluralize}}
+                              {% for comment in comments%}
+                                      <blockquote class="blockquote">
+                                          <p class="mb-0">{{comment.content}}</p>
+                                          <footer class="blockquote-footer">By <cite title="Source Title">{{user.username}}</cite></footer>
+                                      </blockquote>
+                                      <div class="replied-comments container mt-2">
+                                          {% for reply in comment.replies.all %}
+                                              <blockquote class="blockquote">
+                                                  <p class="mb-0">{{reply.content}}</p>
+                                                  <footer class="blockquote-footer">By <cite title="Source Title">{{reply.user}}</cite></footer>
+                                              </blockquote>
+                                          {% endfor %}
+                                          <div class="form-group row">
+                                              <form method="POST" enctype="multipart/form-data">
+                                                  {%csrf_token%}
+                                                  <input type="hidden" name="comment_id" value="{{comment.id}}">
+                                                  {{comment_form|crispy}}
+                                                  <input type="submit" value="Submit" class="btn btn-outline-success" >
+                                              </form>
+                                          </div>
+                                      </div>
+                                  {% endfor %}
+                          </div>
+
+
+              </div>
+            </article>
+
+     {% endblock %}
